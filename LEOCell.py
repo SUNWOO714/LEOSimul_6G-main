@@ -35,13 +35,13 @@ class LEOCell(LEOBase):
             for lat, lon in zip(cell_lat, cell_lon)
         ])  # [km]
         self.latlonalt = np.column_stack((cell_lat, cell_lon, cell_alt))
-        # 여기에 self.vel에는 0의 벡터를 갖도록 설정해줘 3 by 생성된 셀 수
-        self.vel = ??
 
-    def __init__(self, grid_id: int, alt: float, vel_abs: float):
-        super().__init__(grid_id)
-        # 비행기 시나리오를 위한 initializaer야 lat, lon은 그리드 내에서 랜덤하게 설정되도록 코드를 구현해줘
+        self.vel = np.zeros((len(self.xyz), 3))
 
-    def __init__(self, grid_id: int, lat: float, lon: float, alt: float, vel_abs: float):
-        super().__init__(grid_id)
-        # 비행기 시나리오를 위한 initializaer야. 이건 테스트 용도로 만드려고 해 lat, lon을 동일하게 설정하는거지
+    # def __init__(self, grid_id: int, alt: float, vel_abs: float):
+    #     super().__init__(grid_id)
+    #     # 비행기 시나리오를 위한 initializaer야 lat, lon은 그리드 내에서 랜덤하게 설정되도록 코드를 구현해줘
+
+    # def __init__(self, grid_id: int, lat: float, lon: float, alt: float, vel_abs: float):
+    #     super().__init__(grid_id)
+    #     # 비행기 시나리오를 위한 initializaer야. 이건 테스트 용도로 만드려고 해 lat, lon을 동일하게 설정하는거지
