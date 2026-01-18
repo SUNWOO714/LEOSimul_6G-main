@@ -4,11 +4,12 @@ from LEOCell import LEOCell
 from LEOSatellite import LEOSatellite
 from LEOSystem import LEOSystem
 from LEOVisual import LEOVisual
+from LEOAircraft import LEOAircraft
 
-grid_id = 10 # Fixed index for testing – do NOT modify
+GRID_ID = 10 # Fixed index for testing – do NOT modify
 
-ue  = LEOCell(grid_id)
-sat = LEOSatellite(grid_id)
+ue  = LEOCell(grid_id=GRID_ID)
+sat = LEOSatellite(grid_id=GRID_ID)
 
 pos_sat = sat.xyz
 pos_ue  = ue.xyz
@@ -41,8 +42,13 @@ elev_sat2ue = np.array(elev_sat2ue)
 azi_sat2ue  = np.array(azi_sat2ue)
 elev_ue2sat = np.array(elev_ue2sat)
 azi_ue2sat  = np.array(azi_ue2sat)
-
-LEOVisual.draw_map(grid_id, sat.grid_squares, sat.xyz)
+# LEOVisual.draw_map(grid_id, sat.grid_squares, sat.xyz)
+############################## 비행기 시나리오 ##############################
+AIR_ALT = 10.0 # [km]
+AIR_SPEED = 0.25 # [km/s]
+air = LEOAircraft(grid_id=GRID_ID, alt=AIR_ALT, vel_abs=AIR_SPEED)
+# LEOVisual.draw_map_air(grid_id, sat.grid_squares, sat.xyz, air.xyz)
+############################## 비행기 시나리오 ##############################
 
 e1, cdf_e1 = LEOVisual.compute_cdf(elev_sat2ue)
 e2, cdf_e2 = LEOVisual.compute_cdf(elev_ue2sat)

@@ -41,7 +41,7 @@ class LEOBase:
             (LEOBase.US_LAT_MIN, LEOBase.US_LON_MIN)
         ])
 
-        self.GRID_AREA = self.grid_squares[self.grid_id]
-
         if self.grid_id not in self.grid_squares:
             raise ValueError(f"GRID_ID={self.grid_id} invalid")
+        
+        self.GRID_AREA = self.grid_squares[self.grid_id]

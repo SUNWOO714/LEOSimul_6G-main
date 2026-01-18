@@ -3,7 +3,6 @@ import numpy as np
 GRID_ID = 10 # Fixed index for testing – do NOT modify
 
 class LEOSystem:
-
     # ------------ ECEF 좌표를 위도/경도로 변환 (빈칸1) -------------
     @staticmethod
     def ecef2latlon(xyz: np.ndarray) -> np.ndarray:
@@ -69,11 +68,11 @@ class LEOSystem:
     
     # ------------ Doppler shift 계산 (SAT -> UE) (빈칸5) -------------  # 20 GHz : DL Ka-band setting
     @staticmethod
-    def cal_doppler(pos_sat: np.ndarray, pos_ue: np.ndarray, vel_sat: np.ndarray, vel_cell: np.ndarray) -> np.ndarray:
+    def cal_doppler(pos_sat: np.ndarray, pos_ue: np.ndarray, vel_sat: np.ndarray, vel_ue: np.ndarray) -> np.ndarray:
         
         c = 3e8 # [m/s]
         fc_Hz = 20e9 # [Hz] : DL Ka-band
-        lam_km = c / fc_Hz / 1e3 # 0.000015 [km] 
+        lam_km = c / fc_Hz / 1e3 # [km] 
 
         NSAT = len(pos_sat)
         NUE  = len(pos_ue)
@@ -85,10 +84,15 @@ class LEOSystem:
                 # vel_cell 사용해서 도플러 계산하는 함수 업데이트 해줘!
                 r_sat = pos_sat[sat_idx]
                 r_ue  = pos_ue[ue_idx]
+
                 v_sat = vel_sat[sat_idx]
+                v_ue = vel_ue[ue_idx]
+                v_rel = v_sat - v_ue
+                
                 los = r_ue - r_sat
                 los_hat = los / np.linalg.norm(los)
-                v_rad = np.dot(v_sat, los_hat)
+                v_rad = np.dot(v_rel, los_hat)
+                
                 doppler[sat_idx, ue_idx] = (v_rad / lam_km) / 1e3
 
         return doppler   # (NSAT, NUE)

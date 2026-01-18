@@ -12,8 +12,9 @@ sat = LEOSatellite(grid_id=GRID_ID)
 
 pos_sat = sat.xyz
 pos_ue  = ue.xyz
-vel_sat  = sat.vel
 
+vel_sat  = sat.vel
+vel_ue = ue.vel
 grid_squares = bs.grid_squares
 #############################################################
 ue_idx = 10 # Fixed index for testing – do NOT modify
@@ -55,9 +56,6 @@ print("ECEF distance between the selected satellite and the selected cell center
 print(distance[sat_idx][ue_idx], "\n")
 
 # Doppler shift for the selected cell with respect to all satellites
-doppler = LEOSystem.cal_doppler(pos_sat, pos_ue, vel_sat)
+doppler = LEOSystem.cal_doppler(pos_sat, pos_ue, vel_sat, vel_ue)
 print(f"Doppler shift of the selected cell center for the selected satellite [kHz]:")
 print(doppler[sat_idx][ue_idx])
-
-print(" ======================================== Test3 Results ======================================== ")
-print("\n")

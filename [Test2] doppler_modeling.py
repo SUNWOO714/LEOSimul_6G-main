@@ -1,5 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from LEOCell import LEOCell
 from LEOSatellite import LEOSatellite
 from LEOSystem import LEOSystem
@@ -13,8 +11,9 @@ sat = LEOSatellite(grid_id=GRID_ID)
 pos_sat = sat.xyz
 pos_ue  = ue.xyz
 vel_sat  = sat.vel
-       
-doppler_all = LEOSystem.cal_doppler(pos_sat, pos_ue, vel_sat)
+vel_ue = ue.vel
+
+doppler_all = LEOSystem.cal_doppler(pos_sat, pos_ue, vel_sat, vel_ue)
 doppler_flat = doppler_all.flatten() 
 dop, cdf_dop = LEOVisual.compute_cdf(doppler_flat)
 LEOVisual.plot_doppler_cdf(dop, cdf_dop)
