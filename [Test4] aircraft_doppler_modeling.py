@@ -1,57 +1,56 @@
-import numpy as np
 from LEOCell import LEOCell
 from LEOSatellite import LEOSatellite
 from LEOSystem import LEOSystem
 from LEOVisual import LEOVisual
-from LEOAircraft import LEOAircraft
+import matplotlib.pyplot as plt
 
-GRID_ID = 10 # Fixed index for testing – do NOT modify
-AIR_ALT = 10.0 # [km]
-AIR_SPEED = 0.25 # [km/s]
+GRID_ID = 10
 
 ue  = LEOCell(grid_id=GRID_ID)
 sat = LEOSatellite(grid_id=GRID_ID)
 
-pos_sat = sat.xyz           # (NSAT, 3)
-vel_sat = sat.vel           # (NSAT, 3)
-pos_ue = ue.xyz 
+pos_ue = ue.xyz
 vel_ue = ue.vel
 
-doppler_all = LEOSystem.cal_doppler(pos_sat, pos_ue, vel_sat, vel_ue)
+print("baseline xyz ", sat.xyz[0])
+print("new xyz ", sat.xyz[0])
+print("baseline velocity ", sat.vel_baseline[0])
+print("new velocity ", sat.vel[0])
 
-doppler_flat = doppler_all.flatten() 
-dop, cdf_dop = LEOVisual.compute_cdf(doppler_flat)
+# baseline
+doppler_all = LEOSystem.cal_doppler(
+    sat.xyz, pos_ue,
+    sat.vel_baseline, vel_ue
+)
+dop, cdf_dop = LEOVisual.compute_cdf(doppler_all.flatten())
 
-NAIR = len(pos_ue)
-pos_air = np.zeros((NAIR, 3))
-vel_air = np.zeros((NAIR, 3))
 
-lat_air = []
-lon_air = []
-for idx in range(len(pos_ue)):
-    lat_air = ue.latlonalt[idx, 0]
-    lon_air = ue.latlonalt[idx, 1]
-    air = LEOAircraft(grid_id=GRID_ID, lat=lat_air, lon=lon_air, alt=AIR_ALT, vel_abs=AIR_SPEED)
-    pos_air[idx, :] = air.xyz
-    vel_air[idx, :] = air.vel
+print(f"Baseline 0번째 셀-0번째 위성 Doppler shift [kHz]: {dop[0]}")
 
-doppler_all = LEOSystem.cal_doppler(pos_sat, pos_air, vel_sat, vel_air)
+# new model
+doppler_all_new = LEOSystem.cal_doppler(
+    sat.xyz, pos_ue,
+    sat.vel, vel_ue
+)
+dop_new, cdf_dop_new = LEOVisual.compute_cdf(doppler_all_new.flatten())
+print(f"New 0번째 셀-0번째 위성 Doppler shift [kHz]: {dop_new[0]}")
+plt.figure(figsize=(7, 7))
 
-doppler_flat = doppler_all.flatten() 
-dop_air, cdf_dop_air = LEOVisual.compute_cdf(doppler_flat)
-
-LEOVisual.plot_doppler_cdf_compare(
-    dop, cdf_dop,
-    dop_air, cdf_dop_air,
-    label1="Ground UE",
-    label2="Aircraft (East, 10 km, 0.25 km/s)",
-    title="LEO Doppler CDF Comparison (DL Ka-band 20GHz)"
+LEOVisual.plot_doppler_cdf_sw(
+    dop, cdf_dop
 )
 
-# LEOVisual.plot_doppler_cdf_compare(
-#     dop, cdf_dop,
-#     dop_air, cdf_dop_air,
-#     label1="Ground UE",
-#     label2="Aircraft (West, 10 km, 0.25 km/s)",
-#     title="LEO Doppler CDF Comparison (DL Ka-band 20GHz)"
-# )
+LEOVisual.plot_doppler_cdf_sw(
+    dop_new, cdf_dop_new
+)
+
+plt.plot(dop, cdf_dop, '-', color='blue', linewidth=2.0, label="Baseline SAT velocity")
+plt.plot(dop_new, cdf_dop_new, '--', color='red', linewidth=2.0, label="New SAT velocity function")
+
+plt.xlabel("Doppler Frequency [kHz]")
+plt.ylabel("CDF")
+plt.title("Doppler CDF Comparison")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()

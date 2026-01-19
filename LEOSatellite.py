@@ -9,8 +9,14 @@ class LEOSatellite(LEOBase):
 
         super().__init__(grid_id)
 
-        # ------------ 지정된 grid 영역 내 SAT의 ECEF 좌표, 위도/경도/고도, 속도 생성 -------------
+        dt = 1e-10
+        xyz_p, _, _ = self.__sat_positions_all_shells(time + dt)
+        xyz_m, _, _ = self.__sat_positions_all_shells(time - dt)
+
+        self.vel_all_baseline = (xyz_p - xyz_m) / (2 * dt)
         self.xyz_all, self.alt_all, self.vel_all = self.__sat_positions_all_shells(time)
+
+        # ------------ 지정된 grid 영역 내 SAT의 ECEF 좌표, 위도/경도/고도, 속도 생성 -------------
 
         latlon_all = LEOSystem.ecef2latlon(self.xyz_all)  # (N, 2)
         lat = latlon_all[:, 0]
@@ -28,8 +34,8 @@ class LEOSatellite(LEOBase):
             (latlon_all[self.mask], self.alt_all[self.mask])
         ) 
         # SAT의 속도
+        self.vel_baseline = self.vel_all_baseline[self.mask] 
         self.vel = self.vel_all[self.mask]          # (NSAT, 3)
-
     # ------------ Single shell ECEF positions & velocity -------------
     def __sat_positions_single_shell(self, h_km: int, inc: float, num_plane: int, num_sat: int, time: int) -> np.ndarray:
 
@@ -60,15 +66,18 @@ class LEOSatellite(LEOBase):
             [0, 0, 1]
         ])
 
-        # SAT velocity
+        # SAT velocity (ECI-frame derivative)
         vx = -R_orbit * w * np.sin(angle)
-        vy = R_orbit * w * np.cos(phi) * np.cos(angle)
-        vz = R_orbit * w * np.sin(phi) * np.cos(angle)
+        vy =  R_orbit * w * np.cos(phi) * np.cos(angle)
+        vz =  R_orbit * w * np.sin(phi) * np.cos(angle)
 
         sat_xyz_vel_0 = np.array([vx, vy, vz])
 
         constell = []
         constell_vel = []
+
+        omega_E = 2 * np.pi / (24 * 3600)
+
         for plane in range(num_plane):
 
             theta = 2 * np.pi * plane / num_plane
@@ -78,13 +87,17 @@ class LEOSatellite(LEOBase):
                 [0, 0, 1]
             ])
 
+            # position in ECEF
             sat_xyz = C_EARTH @ C @ sat_xyz_0
-            sat_xyz_vel = C_EARTH @ C @ sat_xyz_vel_0
+
+            # rotated velocity
+            sat_xyz_vel_rot = C_EARTH @ C @ sat_xyz_vel_0
 
             constell.append(sat_xyz)
-            constell_vel.append(sat_xyz_vel)
+            constell_vel.append(sat_xyz_vel_rot)
 
         return np.hstack(constell).T, np.hstack(constell_vel).T
+
 
     # ------------ All shells ECEF positions & velocity -------------
     def __sat_positions_all_shells(self, time: int = 1) -> np.ndarray:

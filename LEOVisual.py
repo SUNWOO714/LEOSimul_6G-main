@@ -215,7 +215,7 @@ class LEOVisual:
     ):
         import matplotlib.pyplot as plt
 
-        plt.figure(figsize=(7, 5))
+        plt.figure(figsize=(6, 6))
 
         plt.plot(dop1, cdf1, linewidth=2, label=label1)
         plt.plot(dop2, cdf2, linewidth=2, linestyle="--", label=label2)
@@ -228,3 +228,13 @@ class LEOVisual:
 
         plt.tight_layout()
         plt.show()
+
+    # ------------ Doppler CDF (선우 검증용) ------------- 
+    @staticmethod
+    def plot_doppler_cdf_sw(dop, cdf, label=None, lw=2.0):
+        import matplotlib.pyplot as plt
+
+        if label is None:
+            plt.plot(dop, cdf, linewidth=lw)
+        else:
+            plt.plot(dop, cdf, label=label, linewidth=lw)
