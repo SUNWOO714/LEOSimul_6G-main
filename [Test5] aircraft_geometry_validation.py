@@ -4,13 +4,28 @@ from LEOBase import LEOBase
 from LEOCell import LEOCell
 from LEOSatellite import LEOSatellite
 from LEOSystem import LEOSystem
-from LEOAircraft import LEOAircraft
 
 GRID_ID = 10 # Fixed index for testing – do NOT modify
+UE_ALT = 0
+AIR_ALT = 10 # [km]
+UE_VEL = 0 # [km/s]
+AIR_VEL = 0.25 # [km/s]
+LAT = 33.77108773051596
+LON = -104.10327967561538
 
 bs  = LEOBase(grid_id=GRID_ID)
-ue  = LEOCell(grid_id=GRID_ID)
 sat = LEOSatellite(grid_id=GRID_ID)
+
+# 비행기
+(grid_lon_min, grid_lat_min,
+    grid_lon_max, grid_lat_max) = bs.GRID_AREA.bounds
+LAT = np.random.uniform(grid_lat_min, grid_lat_max) 
+LON = np.random.uniform(grid_lon_min, grid_lon_max)
+
+air  = LEOCell(grid_id=GRID_ID, alt=AIR_ALT, lat=LAT, lon=LON, vel_abs=AIR_VEL, heading_deg=0) # 동쪽으로 움직임
+
+# 고정 지상 유저
+ue  = LEOCell(grid_id=GRID_ID, alt=UE_ALT, vel_abs=UE_VEL)
 
 pos_sat = sat.xyz
 pos_ue  = ue.xyz
@@ -63,10 +78,8 @@ print(f"Doppler shift of the selected cell center for the selected satellite [kH
 print(doppler[sat_idx][ue_idx])
 
 print(" ------------------------------ Aircraft ------------------------------")
-AIR_ALT = 10.0 # [km]
-AIR_SPEED = 0.25 # [km/s]
 # air = LEOAircraft(grid_id=GRID_ID, lat=33.77108773051596, lon=-104.10327967561538, alt=AIR_ALT, vel_abs=AIR_SPEED) # TEST용
-air = LEOAircraft(grid_id=GRID_ID, alt=AIR_ALT, vel_abs=AIR_SPEED)
+
 
 pos_air = air.xyz
 vel_air  = air.vel
@@ -98,6 +111,8 @@ elev2, azi2 = LEOSystem.cal_angle(pos_air[air_idx], pos_sat[sat_idx], air_latlon
 print("Elevation / Azimuth from UE to SAT [deg]:", elev2, azi2, "\n")
 
 # Distance between the selected satellite and the selected aircraft
+print(pos_ue)
+print(pos_air)
 distance = LEOSystem.cal_distance(pos_sat, pos_air)
 print("ECEF distance between the selected satellite and the selected aircraft [km]:")
 print(distance[sat_idx][air_idx], "\n")
@@ -107,12 +122,12 @@ doppler = LEOSystem.cal_doppler(pos_sat, pos_air, vel_sat, vel_air)
 print(f"Doppler shift of the selected aircraft for the selected satellite [kHz]:")
 print(doppler[sat_idx][air_idx])
 
-# 비행기와 위성 간 이동 방향이 같은지/ 다른지 내적을 통해 판별
-cos_theta = np.dot(vel_sat[sat_idx], vel_air[air_idx]) / (np.linalg.norm(vel_sat[sat_idx]) * np.linalg.norm(vel_air[air_idx]))
-if cos_theta > 0:
-    print(f"내적 결과: {cos_theta} -> 비행기와 위성은 거의 같은 이동방향")
-else:
-    print(f"내적 결과: {cos_theta} -> 비행기와 위성의 이동방향은 다름")
+# # 비행기와 위성 간 이동 방향이 같은지/ 다른지 내적을 통해 판별
+# cos_theta = np.dot(vel_sat[sat_idx], vel_air[air_idx]) / (np.linalg.norm(vel_sat[sat_idx]) * np.linalg.norm(vel_air[air_idx]))
+# if cos_theta > 0:
+#     print(f"내적 결과: {cos_theta} -> 비행기와 위성은 거의 같은 이동방향")
+# else:
+#     print(f"내적 결과: {cos_theta} -> 비행기와 위성의 이동방향은 다름")
 
 print(" ======================================== Test3 Results ======================================== ")
 print("\n")
