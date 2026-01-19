@@ -92,9 +92,17 @@ class LEOSatellite(LEOBase):
 
             # rotated velocity
             sat_xyz_vel_rot = C_EARTH @ C @ sat_xyz_vel_0
-
+            # GPT 도움 받아서 지구 자전 영향 무시하도록 omega를 빼줘도 경향성만 비슷하고 동일한 값 안나옴
+            omega_cross_r = np.cross(
+                np.array([0, 0, omega_E]),
+                sat_xyz,
+                axis=0
+            )
+            
+            sat_xyz_vel = sat_xyz_vel_rot - omega_cross_r
+            
             constell.append(sat_xyz)
-            constell_vel.append(sat_xyz_vel_rot)
+            constell_vel.append(sat_xyz_vel) 
 
         return np.hstack(constell).T, np.hstack(constell_vel).T
 
